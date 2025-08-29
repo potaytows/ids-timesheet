@@ -593,10 +593,9 @@
                     <td>${record.taskType}</td>
                     <td>${record.role}</td>
                     <td>${record.workname}</td>
-                    <td><span class="status-badge status-${record.status.toLowerCase().replace(' ', '')}">${record.status}</span></td>
                     <td>${record.startTime}</td>
                     <td>${record.endTime}</td>
-                    <td>${record.duration}</td>
+                    <td><span class="status-badge status-${record.status.toLowerCase().replace(' ', '')}">${record.status}</span></td>
                     <td>${record.remark}</td>
                     <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>
                 `;
