@@ -354,15 +354,15 @@
                     <label for="taskType">Task Type</label>
                     <select id="taskType">
                         <option value="">Select Task Type</option>
-                        <option value="Plan - Work as Plan">Plan - Work as Plan</option>
-                        <option value="Ad-Hoc - Work as Order">Ad-Hoc - Work as Order</option>
-                        <option value="Re-work - Correct Work Product">Re-work - Correct Work Product</option>
-                        <option value="ORG - Other Organization Job">ORG - Other Organization Job</option>
-                        <option value="SL - Sick Leave">SL - Sick Leave</option>
-                        <option value="TCS - Technical Consult">TCS - Technical Consult</option>
-                        <option value="ATC - Attend Training Course">ATC - Attend Training Course</option>
-                        <option value="TH - Tradition Holidays">TH - Tradition Holidays</option>
-                        <option value="AL - Annual Leave">AL - Annual Leave</option>
+                        <option value="Plan = Work as Plan">Plan = Work as Plan</option>
+                        <option value="Ad-Hoc = Work as Order">Ad-Hoc = Work as Order</option>
+                        <option value="Re-work = Correct Work Product">Re-work = Correct Work Product</option>
+                        <option value="ORG = Other Organization Job">ORG = Other Organization Job</option>
+                        <option value="SL = Sick Leave">SL = Sick Leave</option>
+                        <option value="TCS = Technical Consult">TCS = Technical Consult</option>
+                        <option value="ATC = Attend Training Course">ATC = Attend Training Course</option>
+                        <option value="TH = Tradition Holidays">TH = Tradition Holidays</option>
+                        <option value="AL = Annual Leave">AL = Annual Leave</option>
                         <option value="Others">Others</option>
                     </select>
                 </div>
@@ -371,26 +371,26 @@
                     <label for="role">Role</label>
                     <select id="role">
                         <option value="">Select Role</option>
-                        <option value="PM - Project Manager">PM - Project Manager</option>
-                        <option value="BA - Business Analyst">BA - Business Analyst</option>
-                        <option value="SA - System Analyst">SA - System Analyst</option>
-                        <option value="DBA - Database Administrator">DBA - Database Administrator</option>
-                        <option value="DEV - Software Developer">DEV - Software Developer</option>
-                        <option value="WEB - Web Designer">WEB - Web Designer</option>
-                        <option value="TEST - Software Tester">TEST - Software Tester</option>
-                        <option value="CM - Configuration Manager">CM - Configuration Manager</option>
-                        <option value="QA - Quality Assurance">QA - Quality Assurance</option>
-                        <option value="UX - UX UI Designer">UX - UX UI Designer</option>
-                        <option value="CO - Project Coordinator">CO - Project Coordinator</option>
-                        <option value="PMO - Project Management Office">PMO - Project Management Office</option>
-                        <option value="AD - Admin">AD - Admin</option>
+                        <option value="PM = Project Manager">PM = Project Manager</option>
+                        <option value="BA = Business Analyst">BA = Business Analyst</option>
+                        <option value="SA = System Analyst">SA = System Analyst</option>
+                        <option value="DBA = Database Administrator">DBA = Database Administrator</option>
+                        <option value="DEV = Software Developer">DEV = Software Developer</option>
+                        <option value="WEB = Web Designer">WEB = Web Designer</option>
+                        <option value="TEST = Software Tester">TEST = Software Tester</option>
+                        <option value="CM = Configuration Manager">CM = Configuration Manager</option>
+                        <option value="QA = Quality Assurance">QA = Quality Assurance</option>
+                        <option value="UX = UX UI Designer">UX = UX UI Designer</option>
+                        <option value="CO = Project Coordinator">CO = Project Coordinator</option>
+                        <option value="PMO = Project Management Office">PMO = Project Management Office</option>
+                        <option value="AD = Admin">AD = Admin</option>
                         <option value="Others">Others</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="workname">Work Name</label>
-                    <input type="text" id="workname" placeholder="Enter work name">
+                    <label for="workname">Work Product Name / Task Description / Activity</label>
+                    <input type="text" id="workname" placeholder="Enter work product name or task description">
                 </div>
 
                 <div class="form-group">
@@ -405,8 +405,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="remark">Remark</label>
-                    <input type="text" id="remark" placeholder="Enter remark">
+                    <label for="remark">Remark (Define Work Product Size when Status = Complete)</label>
+                    <input type="text" id="remark" placeholder="e.g., Actual Work Product Size: 5 pages, 200 LOC, etc.">
                 </div>
             </div>
 
@@ -438,15 +438,16 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Project</th>
+                        <th>No.</th>
+                        <th>Project ID</th>
                         <th>Category</th>
                         <th>Task Type</th>
                         <th>Role</th>
-                        <th>Work Name</th>
+                        <th>Work Product Name / Task Description / Activity</th>
                         <th>Start Time</th>
                         <th>End Time</th>
-                        <th>Status</th>        
-                        <th>remark</th>                
+                        <th>Status</th>
+                        <th>Remark</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -460,11 +461,13 @@
         let timerInterval = null;
         let startTime = null;
         let records = [];
+        let runningTask = null;
 
         // Load records from localStorage on page load
         window.onload = function() {
             loadRecords();
             displayRecords();
+            loadRunningTask();
         };
 
         function startTimer() {
@@ -483,6 +486,19 @@
 
             // Disable form inputs during timing
             disableFormInputs(true);
+
+            // Save running task to localStorage
+            runningTask = {
+                startTime: startTime.toISOString(),
+                project: document.getElementById('project').value,
+                category: document.getElementById('category').value,
+                taskType: document.getElementById('taskType').value,
+                role: document.getElementById('role').value,
+                workname: document.getElementById('workname').value,
+                status: document.getElementById('status').value,
+                remark: document.getElementById('remark').value
+            };
+            localStorage.setItem('runningTask', JSON.stringify(runningTask));
 
             timerInterval = setInterval(updateTimer, 1000);
         }
@@ -509,11 +525,6 @@
             
             clearInterval(timerInterval);
             
-            // Calculate duration
-            const duration = endTime - startTime;
-            const hours = Math.floor(duration / 3600000);
-            const minutes = Math.floor((duration % 3600000) / 60000);
-            
             // Create record
             const record = {
                 date: formatDate(startTime),
@@ -525,13 +536,16 @@
                 status: document.getElementById('status').value,
                 startTime: formatTime(startTime),
                 endTime: formatTime(endTime),
-                duration: `${hours}h ${minutes}m`,
                 remark: document.getElementById('remark').value
             };
             
             records.push(record);
             saveRecords();
             displayRecords();
+            
+            // Clear running task from localStorage
+            localStorage.removeItem('runningTask');
+            runningTask = null;
             
             // Reset timer
             resetTimer();
@@ -587,6 +601,7 @@
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${record.date}</td>
+                    <td>${index + 1}</td>
                     <td>${record.project}</td>
                     <td>${record.category}</td>
                     <td>${record.taskType}</td>
@@ -636,7 +651,7 @@
 
             // Prepare data for Excel
             const wsData = [
-                ['Date', 'No', 'Project ID', 'Category', 'Task Type', 'Role', 'Work Name', 'Start Time', 'End Time' , 'Status' ,'Remark']
+                ['Date', 'No.', 'Project ID', 'Category', 'Task Type', 'Role', 'Work Product Name / Task Description / Activity', 'Start Time', 'End Time', 'Status', 'Remark (Pls define Actual Work Product Size, etc. when status = Complete)']
             ];
             
             records.forEach((record, index) => {
@@ -662,8 +677,8 @@
             // Set column widths
             ws['!cols'] = [
                 {wch: 12}, {wch: 5}, {wch: 15}, {wch: 15}, 
-                {wch: 15}, {wch: 15}, {wch: 25}, {wch: 12},
-                {wch: 10}, {wch: 10}, {wch: 10}, {wch: 30}
+                {wch: 20}, {wch: 25}, {wch: 40}, {wch: 10},
+                {wch: 10}, {wch: 12}, {wch: 50}
             ];
             
             XLSX.utils.book_append_sheet(wb, ws, 'Timesheet');
@@ -688,9 +703,96 @@
             return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         }
 
+        function loadRunningTask() {
+            const saved = localStorage.getItem('runningTask');
+            if (saved) {
+                runningTask = JSON.parse(saved);
+                
+                // Restore form values
+                document.getElementById('project').value = runningTask.project;
+                document.getElementById('category').value = runningTask.category;
+                document.getElementById('taskType').value = runningTask.taskType;
+                document.getElementById('role').value = runningTask.role;
+                document.getElementById('workname').value = runningTask.workname;
+                document.getElementById('status').value = runningTask.status;
+                document.getElementById('remark').value = runningTask.remark;
+                
+                // Restore timer state
+                startTime = new Date(runningTask.startTime);
+                document.getElementById('startTimeDisplay').textContent = formatTime(startTime);
+                document.getElementById('endTimeDisplay').textContent = '--:--:--';
+                
+                // Disable form inputs and buttons
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                disableFormInputs(true);
+                
+                // Show alert that timer is resumed
+                const elapsed = new Date() - startTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                
+                // Create notification div
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    animation: slideIn 0.5s;
+                    max-width: 300px;
+                `;
+                notification.innerHTML = `
+                    <strong>⏰ Timer Resumed!</strong><br>
+                    Task: ${runningTask.workname}<br>
+                    Elapsed: ${hours}h ${minutes}m
+                `;
+                document.body.appendChild(notification);
+                
+                // Remove notification after 5 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'fadeOut 0.5s';
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+                
+                // Resume timer
+                timerInterval = setInterval(updateTimer, 1000);
+                updateTimer(); // Update immediately
+            }
+        }
+
         function pad(num) {
             return num.toString().padStart(2, '0');
         }
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
