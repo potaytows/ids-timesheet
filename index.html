@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Timesheet Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.5s;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .timer-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .timer-display {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .timer-display h2 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .timer-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .timer-info div {
+            text-align: center;
+        }
+
+        .timer-info label {
+            display: block;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .timer-info span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-stop:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .records-table {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.8s;
+            overflow-x: auto;
+        }
+
+        .records-table h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95rem;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #da190b;
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer-display h2 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏱️ Excel Timesheet Tracker</h1>
+            <p>Track your work time and export to Excel format</p>
+        </div>
+
+        <div class="timer-card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="project">Project ID</label>
+                    <select id="project">
+                        <option value="">Select Project</option>
+                        <option value="DFT">DFT</option>
+                        <option value="SMART-I">SMART-I</option>
+                        <option value="OB LBS">OB LBS</option>
+                        <option value="OB CMS">OB CMS</option>
+                        <option value="OB OP APP">OB OP APP</option>
+                        <option value="DFT MA - SMART-I">DFT MA - SMART-I</option>
+                        <option value="ORG">ORG - Organization Job</option>
+                        <option value="PEA DMMS">PEA DMMS</option>
+                        <option value="OB AQI">OB AQI</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">Select Category</option>
+                        <option value="Create Document">Create Document</option>
+                        <option value="Review Document">Review Document</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Coding">Coding</option>
+                        <option value="Revise/Rework">Revise/Rework</option>
+                        <option value="Study/Research">Study/Research</option>
+                        <option value="Audit">Audit</option>
+                        <option value="Test">Test</option>
+                        <option value="Helpdesk">Helpdesk</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskType">Task Type</label>
+                    <select id="taskType">
+                        <option value="">Select Task Type</option>
+                        <option value="Plan">Plan - Work as Plan</option>
+                        <option value="Ad-Hoc">Ad-Hoc - Work as Order</option>
+                        <option value="Re-work">Re-work - Correct Work Product</option>
+                        <option value="ORG">ORG - Other Organization Job</option>
+                        <option value="SL">SL - Sick Leave</option>
+                        <option value="TCS">TCS - Technical Consult</option>
+                        <option value="ATC">ATC - Attend Training Course</option>
+                        <option value="TH">TH - Tradition Holidays</option>
+                        <option value="AL">AL - Annual Leave</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role">
+                        <option value="">Select Role</option>
+                        <option value="PM">PM - Project Manager</option>
+                        <option value="BA">BA - Business Analyst</option>
+                        <option value="SA">SA - System Analyst</option>
+                        <option value="DBA">DBA - Database Administrator</option>
+                        <option value="DEV">DEV - Software Developer</option>
+                        <option value="WEB">WEB - Web Designer</option>
+                        <option value="TEST">TEST - Software Tester</option>
+                        <option value="CM">CM - Configuration Manager</option>
+                        <option value="QA">QA - Quality Assurance</option>
+                        <option value="UX">UX - UX UI Designer</option>
+                        <option value="CO">CO - Project Coordinator</option>
+                        <option value="PMO">PMO - Project Management Office</option>
+                        <option value="AD">AD - Admin</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="workname">Work Name</label>
+                    <input type="text" id="workname" placeholder="Enter work name">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="">Select Status</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="remark">Remark</label>
+                    <input type="text" id="remark" placeholder="Enter remark">
+                </div>
+            </div>
+
+            <div class="timer-display">
+                <h2 id="timerDisplay">00:00:00</h2>
+                <div class="timer-info">
+                    <div>
+                        <label>Start Time</label>
+                        <span id="startTimeDisplay">--:--:--</span>
+                    </div>
+                    <div>
+                        <label>End Time</label>
+                        <span id="endTimeDisplay">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-start" id="startBtn" onclick="startTimer()">▶ Start Timer</button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopTimer()" disabled>⏹ Stop Timer</button>
+                <button class="btn btn-export" onclick="exportToExcel()">📥 Export to Excel</button>
+                <button class="btn btn-clear" onclick="clearAllRecords()">🗑️ Clear All</button>
+            </div>
+        </div>
+
+        <div class="records-table">
+            <h3>📊 Time Records</h3>
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Category</th>
+                        <th>Task Type</th>
+                        <th>Role</th>
+                        <th>Work Name</th>
+                        <th>Status</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Duration</th>
+                        <th>Remark</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval = null;
+        let startTime = null;
+        let records = [];
+
+        // Load records from localStorage on page load
+        window.onload = function() {
+            loadRecords();
+            displayRecords();
+        };
+
+        function startTimer() {
+            // Validate form
+            if (!validateForm()) {
+                alert('Please fill in all required fields!');
+                return;
+            }
+
+            startTime = new Date();
+            document.getElementById('startTimeDisplay').textContent = formatTime(startTime);
+            document.getElementById('endTimeDisplay').textContent = '--:--:--';
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+
+            // Disable form inputs during timing
+            disableFormInputs(true);
+
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const now = new Date();
+            const diff = now - startTime;
+            
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            document.getElementById('timerDisplay').textContent = 
+                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        function stopTimer() {
+            if (!startTime) return;
+
+            const endTime = new Date();
+            document.getElementById('endTimeDisplay').textContent = formatTime(endTime);
+            
+            clearInterval(timerInterval);
+            
+            // Calculate duration
+            const duration = endTime - startTime;
+            const hours = Math.floor(duration / 3600000);
+            const minutes = Math.floor((duration % 3600000) / 60000);
+            
+            // Create record
+            const record = {
+                date: formatDate(startTime),
+                project: document.getElementById('project').value,
+                category: document.getElementById('category').value,
+                taskType: document.getElementById('taskType').value,
+                role: document.getElementById('role').value,
+                workname: document.getElementById('workname').value,
+                status: document.getElementById('status').value,
+                startTime: formatTime(startTime),
+                endTime: formatTime(endTime),
+                duration: `${hours}h ${minutes}m`,
+                remark: document.getElementById('remark').value
+            };
+            
+            records.push(record);
+            saveRecords();
+            displayRecords();
+            
+            // Reset timer
+            resetTimer();
+        }
+
+        function resetTimer() {
+            document.getElementById('timerDisplay').textContent = '00:00:00';
+            document.getElementById('startTimeDisplay').textContent = '--:--:--';
+            document.getElementById('endTimeDisplay').textContent = '--:--:--';
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            startTime = null;
+            
+            // Enable form inputs
+            disableFormInputs(false);
+            
+            // Clear form
+            document.getElementById('project').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('taskType').value = '';
+            document.getElementById('role').value = '';
+            document.getElementById('workname').value = '';
+            document.getElementById('status').value = '';
+            document.getElementById('remark').value = '';
+        }
+
+        function validateForm() {
+            return document.getElementById('project').value &&
+                   document.getElementById('category').value &&
+                   document.getElementById('taskType').value &&
+                   document.getElementById('role').value &&
+                   document.getElementById('workname').value &&
+                   document.getElementById('status').value;
+        }
+
+        function disableFormInputs(disable) {
+            document.getElementById('project').disabled = disable;
+            document.getElementById('category').disabled = disable;
+            document.getElementById('taskType').disabled = disable;
+            document.getElementById('role').disabled = disable;
+            document.getElementById('workname').disabled = disable;
+            document.getElementById('status').disabled = disable;
+            document.getElementById('remark').disabled = disable;
+        }
+
+        function displayRecords() {
+            const tbody = document.getElementById('recordsBody');
+            tbody.innerHTML = '';
+            
+            records.forEach((record, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.project}</td>
+                    <td>${record.category}</td>
+                    <td>${record.taskType}</td>
+                    <td>${record.role}</td>
+                    <td>${record.workname}</td>
+                    <td><span class="status-badge status-${record.status.toLowerCase().replace(' ', '')}">${record.status}</span></td>
+                    <td>${record.startTime}</td>
+                    <td>${record.endTime}</td>
+                    <td>${record.duration}</td>
+                    <td>${record.remark}</td>
+                    <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>
+                `;
+            });
+        }
+
+        function deleteRecord(index) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                records.splice(index, 1);
+                saveRecords();
+                displayRecords();
+            }
+        }
+
+        function clearAllRecords() {
+            if (confirm('Are you sure you want to clear all records?')) {
+                records = [];
+                saveRecords();
+                displayRecords();
+            }
+        }
+
+        function saveRecords() {
+            localStorage.setItem('timesheetRecords', JSON.stringify(records));
+        }
+
+        function loadRecords() {
+            const saved = localStorage.getItem('timesheetRecords');
+            if (saved) {
+                records = JSON.parse(saved);
+            }
+        }
+
+        function exportToExcel() {
+            if (records.length === 0) {
+                alert('No records to export!');
+                return;
+            }
+
+            // Prepare data for Excel
+            const wsData = [
+                ['Date', 'No', 'Project ID', 'Category', 'Task Type', 'Role', 'Work Name', 'Status', 'Start Time', 'End Time', 'Duration', 'Remark']
+            ];
+            
+            records.forEach((record, index) => {
+                wsData.push([
+                    record.date,
+                    index + 1,
+                    record.project,
+                    record.category,
+                    record.taskType,
+                    record.role,
+                    record.workname,
+                    record.status,
+                    record.startTime,
+                    record.endTime,
+                    record.duration,
+                    record.remark
+                ]);
+            });
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                {wch: 12}, {wch: 5}, {wch: 15}, {wch: 15}, 
+                {wch: 15}, {wch: 15}, {wch: 25}, {wch: 12},
+                {wch: 10}, {wch: 10}, {wch: 10}, {wch: 30}
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'Timesheet');
+            
+            // Generate filename with current date
+            const filename = `timesheet_${formatDate(new Date()).replace(/\//g, '-')}.xlsx`;
+            
+            // Export file
+            XLSX.writeFile(wb, filename);
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const day = pad(d.getDate());
+            const month = pad(d.getMonth() + 1);
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function formatTime(date) {
+            const d = new Date(date);
+            return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+    </script>
+</body>
+</html>
