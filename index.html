@@ -446,7 +446,6 @@
                         <th>Status</th>
                         <th>Start Time</th>
                         <th>End Time</th>
-                        <th>Duration</th>
                         <th>Remark</th>
                         <th>Action</th>
                     </tr>
@@ -637,7 +636,7 @@
 
             // Prepare data for Excel
             const wsData = [
-                ['Date', 'No', 'Project ID', 'Category', 'Task Type', 'Role', 'Work Name', 'Status', 'Start Time', 'End Time', 'Duration', 'Remark']
+                ['Date', 'No', 'Project ID', 'Category', 'Task Type', 'Role', 'Work Name', 'Start Time', 'End Time' , 'Status' ,'Remark']
             ];
             
             records.forEach((record, index) => {
@@ -649,10 +648,9 @@
                     record.taskType,
                     record.role,
                     record.workname,
-                    record.status,
                     record.startTime,
                     record.endTime,
-                    record.duration,
+                    record.status,
                     record.remark
                 ]);
             });
