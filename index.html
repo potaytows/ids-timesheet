@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="icon" type="image/x-icon" href="https://theislanddigital.com/images/svg/ids_logo.svg">
+</head>
 
 <body class="min-h-screen bg-gradient-to-br from-[#235e86] to-[#216089] p-5">
     <div class="container mx-auto max-w-7xl">
@@ -19,9 +20,11 @@
 
         <!-- Timer Card -->
         <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl mb-8 animate-fade-in-up">
-            <div>*Notice* export แล้วก็อปข้อมูลไปวางใน template ของทาง บ. นะครับ เพราะที่ export ค่อนข้างอ่านยากครับ
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+                <p class="font-bold">Notice:</p>
+                <p>Export แล้วก็อปข้อมูลไปวางใน template ของทาง บ. นะครับ เพราะที่ export ออกไปค่อนข้างอ่านยากครับ</p>
             </div>
-            <br>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
                 <div class="flex flex-col">
                     <label for="project"
@@ -168,17 +171,14 @@
                         <tr class="bg-gradient-to-r from-[#235e86] to-[#216089] text-white">
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Date</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">No.</th>
-                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Project ID
-                            </th>
+                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Project ID</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Category</th>
-                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Task Type
-                            </th>
+                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Task Type</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Role</th>
-                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Work Product
-                                Name</th>
-                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Start Time
-                            </th>
+                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Work Product Name</th>
+                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Start Time</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">End Time</th>
+                            <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Duration</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Status</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Remark</th>
                             <th class="px-4 py-4 text-left font-semibold uppercase text-xs tracking-wider">Action</th>
@@ -197,8 +197,7 @@
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Select Task Status</h2>
 
             <div class="mb-4">
-                <label for="modalStatus" class="font-semibold text-gray-700 mb-2 block">What is the status of this
-                    task?</label>
+                <label for="modalStatus" class="font-semibold text-gray-700 mb-2 block">What is the status of this task?</label>
                 <select id="modalStatus"
                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
                     <option value="Completed">Completed</option>
@@ -227,6 +226,153 @@
         </div>
     </div>
 
+    <!-- Edit Record Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-4xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">✏️ Edit Time Record</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Date -->
+                <div class="flex flex-col">
+                    <label for="editDate" class="font-semibold text-gray-700 mb-2">Date</label>
+                    <input type="date" id="editDate"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+
+                <!-- Project -->
+                <div class="flex flex-col">
+                    <label for="editProject" class="font-semibold text-gray-700 mb-2">Project ID</label>
+                    <select id="editProject"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                        <option value="">Select Project</option>
+                        <option value="DFT">DFT</option>
+                        <option value="SMART-I">SMART-I</option>
+                        <option value="OB LBS">OB LBS</option>
+                        <option value="OB CMS">OB CMS</option>
+                        <option value="OB OP APP">OB OP APP</option>
+                        <option value="DFT MA - SMART-I">DFT MA - SMART-I</option>
+                        <option value="ORG">ORG - Organization Job</option>
+                        <option value="PEA DMMS">PEA DMMS</option>
+                        <option value="OB AQI">OB AQI</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Category -->
+                <div class="flex flex-col">
+                    <label for="editCategory" class="font-semibold text-gray-700 mb-2">Category</label>
+                    <select id="editCategory"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                        <option value="">Select Category</option>
+                        <option value="Create Document">Create Document</option>
+                        <option value="Review Document">Review Document</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Coding">Coding</option>
+                        <option value="Revise/Rework">Revise/Rework</option>
+                        <option value="Study/Research">Study/Research</option>
+                        <option value="Audit">Audit</option>
+                        <option value="Test">Test</option>
+                        <option value="Helpdesk">Helpdesk</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Task Type -->
+                <div class="flex flex-col">
+                    <label for="editTaskType" class="font-semibold text-gray-700 mb-2">Task Type</label>
+                    <select id="editTaskType"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                        <option value="">Select Task Type</option>
+                        <option value="Plan = Work as Plan">Plan = Work as Plan</option>
+                        <option value="Ad-Hoc = Work as Order">Ad-Hoc = Work as Order</option>
+                        <option value="Re-work = Correct Work Product">Re-work = Correct Work Product</option>
+                        <option value="ORG = Other Organization Job">ORG = Other Organization Job</option>
+                        <option value="SL = Sick Leave">SL = Sick Leave</option>
+                        <option value="TCS = Technical Consult">TCS = Technical Consult</option>
+                        <option value="ATC = Attend Training Course">ATC = Attend Training Course</option>
+                        <option value="TH = Tradition Holidays">TH = Tradition Holidays</option>
+                        <option value="AL = Annual Leave">AL = Annual Leave</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Role -->
+                <div class="flex flex-col">
+                    <label for="editRole" class="font-semibold text-gray-700 mb-2">Role</label>
+                    <select id="editRole"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                        <option value="">Select Role</option>
+                        <option value="PM = Project Manager">PM = Project Manager</option>
+                        <option value="BA = Business Analyst">BA = Business Analyst</option>
+                        <option value="SA = System Analyst">SA = System Analyst</option>
+                        <option value="DBA = Database Administrator">DBA = Database Administrator</option>
+                        <option value="DEV = Software Developer">DEV = Software Developer</option>
+                        <option value="WEB = Web Designer">WEB = Web Designer</option>
+                        <option value="TEST = Software Tester">TEST = Software Tester</option>
+                        <option value="CM = Configuration Manager">CM = Configuration Manager</option>
+                        <option value="QA = Quality Assurance">QA = Quality Assurance</option>
+                        <option value="UX = UX UI Designer">UX = UX UI Designer</option>
+                        <option value="CO = Project Coordinator">CO = Project Coordinator</option>
+                        <option value="PMO = Project Management Office">PMO = Project Management Office</option>
+                        <option value="AD = Admin">AD = Admin</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Work Product Name -->
+                <div class="flex flex-col">
+                    <label for="editWorkname" class="font-semibold text-gray-700 mb-2">Work Product Name</label>
+                    <input type="text" id="editWorkname" placeholder="Enter work product name"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+
+                <!-- Start Time -->
+                <div class="flex flex-col">
+                    <label for="editStartTime" class="font-semibold text-gray-700 mb-2">Start Time</label>
+                    <input type="time" id="editStartTime" step="1"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+
+                <!-- End Time -->
+                <div class="flex flex-col">
+                    <label for="editEndTime" class="font-semibold text-gray-700 mb-2">End Time</label>
+                    <input type="time" id="editEndTime" step="1"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+
+                <!-- Status -->
+                <div class="flex flex-col">
+                    <label for="editStatus" class="font-semibold text-gray-700 mb-2">Status</label>
+                    <select id="editStatus"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                        <option value="Completed">Completed</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Remark -->
+                <div class="flex flex-col md:col-span-2">
+                    <label for="editRemark" class="font-semibold text-gray-700 mb-2">Remark</label>
+                    <input type="text" id="editRemark" placeholder="Enter remark"
+                        class="px-4 py-3 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all">
+                </div>
+            </div>
+
+            <div class="flex gap-4 justify-center">
+                <button onclick="closeEditModal()"
+                    class="px-8 py-3 bg-gray-200 text-gray-700 rounded-full font-semibold hover:bg-gray-300 hover:-translate-y-0.5 transition-all duration-200">
+                    Cancel
+                </button>
+                <button onclick="saveEdit()"
+                    class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
+                    💾 Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tailwind Animation Styles -->
     <style>
         @keyframes fadeInDown {
@@ -234,7 +380,6 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -246,7 +391,6 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -261,7 +405,8 @@
             animation: fadeInUp 0.6s;
         }
     </style>
-    <script src="timesheetScript.js"></script>
+<script src="timesheetScript.js"></script>
+   
 </body>
 
 </html>
