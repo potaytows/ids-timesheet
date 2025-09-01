@@ -232,6 +232,7 @@ function displayRecords() {
     records.forEach((record, index) => {
         const row = tbody.insertRow();
         const statusClass = getStatusClass(record.status);
+        const duration = calculateDuration(record.startTime, record.endTime);
         row.className = 'hover:bg-gray-50 transition-colors';
         row.innerHTML = `
             <td class="px-4 py-3 text-sm">${record.date}</td>
@@ -243,6 +244,7 @@ function displayRecords() {
             <td class="px-4 py-3 text-sm">${record.workname}</td>
             <td class="px-4 py-3 text-sm">${record.startTime}</td>
             <td class="px-4 py-3 text-sm">${record.endTime}</td>
+            <td class="px-4 py-3 text-sm font-semibold">${duration}</td>
             <td class="px-4 py-3 text-sm"><span class="${statusClass}">${record.status}</span></td>
             <td class="px-4 py-3 text-sm">${record.remark}</td>
             <td class="px-4 py-3 text-sm">
@@ -275,6 +277,22 @@ function getStatusClass(status) {
     }
 }
 
+// Utility Functions
+function calculateDuration(startTime, endTime) {
+    const start = new Date(`2000-01-01 ${startTime}`);
+    const end = new Date(`2000-01-01 ${endTime}`);
+    let diff = end - start;
+    
+    // Handle cases where end time is on the next day
+    if (diff < 0) {
+        diff += 24 * 60 * 60 * 1000; // Add 24 hours in milliseconds
+    }
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+
+    return `${hours}h ${minutes}m`;
+}
 
 function validateForm() {
     return document.getElementById('project').value &&
